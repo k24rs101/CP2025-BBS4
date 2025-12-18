@@ -113,6 +113,7 @@ function createPost(author, content) {
     const postData = {
         author: currentUser.email,
         content: content,
+        editCount:0,
         timestamp: firebase.database.ServerValue.TIMESTAMP,
         userId: currentUser.uid
     };
@@ -198,6 +199,9 @@ function createPostElement(post) {
             <div class="post-footer">
                 <span class="post-time">
                     ${formatTimestamp(post.timestamp)}
+                </span>
+                <span class="post-edit-count">
+                (編集回数:${post.editCount||0}回)
                 </span>
                 ${post.updatedAt ? `
                     <span class="post-updated">
@@ -353,22 +357,30 @@ function updatePost(postId) {
     const contentVal = $(`#edit-${postId}`).val();
     if (!validateContent(contentVal)) return;
 
-    // content の内容を変更し、updatedAt フィールドを付加して、更新後の投稿内容を生成
-    const updates = {
-        content: contentVal,
-        updatedAt: firebase.database.ServerValue.TIMESTAMP
-    };
+    //現在の投稿データを取得
+    postsRef.child(postId).once('value').then(snapshot => {
+        const post = snapshot.val();
 
-    postsRef.child(postId).update(updates)
-    .then(() => {
-        showMessage('投稿を更新しました');
-        $(`#post-${postId}`).removeClass('editing');
-        animateUpdate(postId);
-    })
-    .catch((error) => {
-        showMessage('更新に失敗しました：' + error.message, 'error');
+        const updates = {
+            content: contentVal,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP,
+
+            //編集回数を +1
+            editCount: (post.editCount || 0) + 1
+        };
+
+        postsRef.child(postId).update(updates)
+        .then(() => {
+            showMessage('投稿を更新しました');
+            $(`#post-${postId}`).removeClass('editing');
+            animateUpdate(postId);
+        })
+        .catch((error) => {
+            showMessage('更新に失敗しました：' + error.message, 'error');
+        });
     });
 }
+
 
 // 投稿の削除
 function deletePost(postId) {
