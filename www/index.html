@@ -283,22 +283,30 @@ function handleUpdate() {
     const content = $('#editContent').val();
     if (!validateContent(content)) return;
 
-    const updates = {
-        content: content,
-        updatedAt: firebase.database.ServerValue.TIMESTAMP
-    };
+    // 変更点 現在の投稿データを取得
+    postsRef.child(currentEditId).once('value').then(snapshot => {
+        const post = snapshot.val();
 
-    postsRef.child(currentEditId).update(updates)
-    .then(() => {
-        showMessage('投稿を更新しました');
-        closeModal('editModal');
-        animateUpdate(currentEditId);
-        currentEditId = null;
-    })
-    .catch((error) => {
-        showMessage('更新に失敗しました：' + error.message, 'error');
+        const updates = {
+            content: content,
+            updatedAt: firebase.database.ServerValue.TIMESTAMP,
+            // 変更点 編集回数を +1
+            editCount: (post.editCount || 0) + 1
+        };
+
+        postsRef.child(currentEditId).update(updates)
+        .then(() => {
+            showMessage('投稿を更新しました');
+            closeModal('editModal');
+            animateUpdate(currentEditId);
+            currentEditId = null;
+        })
+        .catch((error) => {
+            showMessage('更新に失敗しました：' + error.message, 'error');
+        });
     });
 }
+
 
 // 削除処理のハンドラ
 function handleDelete() {
