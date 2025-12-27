@@ -112,7 +112,7 @@ function createPost(author, content) {
 
     // author はログインしているユーザのメールアドレスに変更、userId を追加
     const postData = {
-        author: currentUser.email,
+        author: currentUser.displayName || currentUser.email,
         content: content,
         editCount:0,
         timestamp: firebase.database.ServerValue.TIMESTAMP,
@@ -434,6 +434,11 @@ function register(email, password) {
     button.prop('disabled', true);
 
     firebase.auth().createUserWithEmailAndPassword(email, password)
+    .then((userCredential) => {
+        return userCredential.user.updateProfile({
+            displayName:"和也"
+        });
+    })
     .then(() => {
         showMessage('アカウントを作成しました');
         clearAuthForm();
