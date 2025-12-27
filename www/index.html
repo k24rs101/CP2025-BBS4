@@ -551,6 +551,11 @@ window.addEventListener('unload', () => {
         <!-- 認証フォーム（未ログイン時表示） -->
         <div class="auth-container logged-out">
             <div class="form-group">
+                <label for="displayNameInput">表示名</label>
+                <input type="text" id="displayNameInput"
+                       class="form-control" placeholder="ニックネーム">
+            </div>
+            <div class="form-group">
                 <label for="loginEmail">メールアドレス</label>
                 <input type="email" id="loginEmail"
                        class="form-control" placeholder="example@example.com">
